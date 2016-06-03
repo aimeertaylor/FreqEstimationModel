@@ -1,0 +1,10 @@
+Package: FreqEstimationModel
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1
+Date: 2015-08-02
+Authors: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+LazyData: FALSE
+RoxygenNote: 5.0.1
