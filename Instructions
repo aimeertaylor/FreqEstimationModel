@@ -1,0 +1,12 @@
+
+To install all you need to do is 
+Download and unzip FreqEstimationModel
+Double click the .Rproj file to open package project (assuming you have R-studio)
+Build and reload (you'll need to install the R package roxygen2 if you haven't already)
+Open Test_run.R, which is in the inst/ folder
+Set the working directory to the inst/ folder
+Run the Test_run.R script.
+
+Doing so should produce a .RData file of results and a pdf of diagnostics based on simulated data, which I have included in the inst/ folder for demonstration. In the simulated data, I arbitrarily specify 0 and 1 for reference and non-reference alleles, respectively, and 0.5 for mixed. I encode missing data as 99, but there are no missing data in the simulated data. 
+
+Based on many posterior predictive checks of analyses with real data, I recommend using a geometric MOI prior and 50k or more traces for convergence, which can be achieved by setting thinning_interval <- 5, and no_traces_preburnin <- 10000. I'm afraid this R package is still very raw (I intend to polish it this Christmas break) and I am self-taught so you will have to excuse the naive code. Please let me know (aimeet@broadinstitute.org) if you have problems/questions. 
