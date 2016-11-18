@@ -15,8 +15,8 @@ str(data_summary)
 # The subsequent columns are the 'true', simulated haplotype counts
 head(data_summary$Data)
 
-thinning_interval <- 10 # Change this variable to increase the number of iterations per chain that are not saved in memory
-no_traces_preburnin <- 10000 # For managable pdfs, don't exceed 10k.
+thinning_interval <- 1 # Change this variable to increase the number of iterations per chain that are not saved in memory
+no_traces_preburnin <- 10000 # For more traces but managable pdfs, don't exceed 10k and increase thinning interval instead.
 
 # MCMC variables
 no_mcmc_chains <- 3 # Number of mcmcm chains to run
