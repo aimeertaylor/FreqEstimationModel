@@ -1,15 +1,10 @@
 rm(list=ls(all=TRUE)) # Remove all variables from workspace
 library(FreqEstimationModel) # Load the haplotype frequency estimation package
 
-# ************************************************************
-# Set working directory to source file location; for example:
-setwd("~/Dropbox/FreqEstimationModel/inst")
-
-# Variables to change
-#************************************************************
+# TO-DO: Set working directory to source file location
 
 # Select data to run; returns data_summary
-no_markers <- 4 # Choose between 1,2,3,4,5
+no_markers <- 5 # Choose between 1,2,3,4,5
 data_seed <- 2  # Choose between 1,2,3
 load(sprintf('./Simulated Data/Data_no_markers%s_seed%s.RData', no_markers, data_seed)) # Load data
 
@@ -20,8 +15,8 @@ str(data_summary)
 # The subsequent columns are the 'true', simulated haplotype counts
 head(data_summary$Data)
 
-thinning_interval <- 1 # Change this variable to increase the number of iterations per chain that are not
-no_traces_preburnin <- 100 # For managable pdfs, don't exceed 10k.
+thinning_interval <- 10 # Change this variable to increase the number of iterations per chain that are not saved in memory
+no_traces_preburnin <- 10000 # For managable pdfs, don't exceed 10k.
 
 # MCMC variables
 no_mcmc_chains <- 3 # Number of mcmcm chains to run
@@ -80,7 +75,7 @@ results <- mcmc_sampling_parallel(processed_data_list,
                          moi_list,
                          frequency_list,
                          mcmc_variable_list,
-                         cores_max = 4)
+                         cores_max = 3)
 
 
 # Save results
