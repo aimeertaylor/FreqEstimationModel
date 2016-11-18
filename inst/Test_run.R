@@ -4,7 +4,7 @@ library(FreqEstimationModel) # Load the haplotype frequency estimation package
 # TO-DO: Set working directory to source file location
 
 # Select data to run; returns data_summary
-no_markers <- 5 
+no_markers <- 3 
 data_seed <- 2  
 load(sprintf('./Data_no_markers%s_seed%s.RData', no_markers, data_seed)) # Load data
 
