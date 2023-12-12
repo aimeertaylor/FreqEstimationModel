@@ -13,19 +13,12 @@ Beware: this readme is seven years late and hasitily added. Package documentatio
 The model used to estimate frequencies was first described here:
 [Taylor et al. 2014](https://malariajournal.biomedcentral.com/articles/10.1186/1475-2875-13-102)
 
-A comprehensive discription of the model can be found here:
+A comprehensive description of the model can be found here:
 [Thesis_methods_chapter](https://github.com/aimeertaylor/FreqEstimationModel/blob/master/inst/Thesis_methods_chapter.pdf)
 
 Follow the code below to install the model. Thereafter, download the files in the Inst folder and run Test_run.R from within the downloaded folder (I need to make this into a vignette). 
 
 Please email me (aimee.taylor@pasteur.fr) if you find any bugs. 
-
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
-
-Note-to-self: ignoring roxygen2 Encoding: "UTF-8" warning for now as no special characters in documention (see https://stackoverflow.com/questions/51694929/warning-about-utf-8-with-roxygen2). 
-
-
 
 ```r
 install.packages("devtools")
@@ -36,3 +29,9 @@ library(FreqEstimationModel)
 
 help(package = "FreqEstimationModel")
 ```
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+## Note-to-self
+- Ignoring roxygen2 Encoding: "UTF-8" warning for now as no special characters in documention (see https://stackoverflow.com/questions/51694929/warning-about-utf-8-with-roxygen2). 
