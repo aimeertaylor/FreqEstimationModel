@@ -4,8 +4,8 @@ library(FreqEstimationModel) # Load the haplotype frequency estimation package
 # TO-DO: Set working directory to source file location
 
 # Select data to run; returns data_summary
-no_markers <- 3 
-data_seed <- 2  
+no_markers <- 3
+data_seed <- 2
 load(sprintf('./Data_no_markers%s_seed%s.RData', no_markers, data_seed)) # Load data
 
 # Summary of simulated data
@@ -86,20 +86,20 @@ if(!log_like_zero){
 } else {
   dataset<-'QC'
 } # Class character: set to dataset name in order to save pdf with data set name if REAL=TRUE and to apend if REAL=FALSR
-filename <- sprintf('%s_%sIterations_NoMarkers%s_NGS%s_LogLikeZero%s_seed%s',dataset, no_traces_preburnin*thinning_interval, no_markers, NGS, log_like_zero, data_seed, moi_prior)
+filename <- sprintf('%s_%sIterations_NoMarkers%s_NGS%s_LogLikeZero%s_seed%s',dataset, no_traces_preburnin*thinning_interval, no_markers, NGS, log_like_zero, data_seed)
 save(list = c('results', arguments), file = sprintf('./%s.RData', filename))
 
 
 
-# Generate pdf of results
-source('./visualise_results.R')
-visualise_results(results,
-                  data_summary,
-                  PDF = sprintf('./%s.pdf', filename),
-                  child = FALSE,
-                  augment_missing_data,
-                  Simulated = TRUE)
-
+# # Generate pdf of results
+# # Needs de-bugging:
+# source('./visualise_results.R')
+# visualise_results(results,
+#                   data_summary,
+#                   PDF = sprintf('./%s.pdf', filename),
+#                   child = FALSE,
+#                   augment_missing_data,
+#                   Simulated = TRUE)
 
 # Convergence diagnostics
 mcmc_frequency_chains <- mcmc.list(lapply(alply(results$genotype_freq_store_chains, no_mcmc_chains), mcmc))
