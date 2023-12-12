@@ -8,7 +8,7 @@ Here,
 that contain genetically distinct parasites (i.e., those that are polyclonal);
 - parasite genetic data are prevalence data (i.e., they describe the presence of alleles - the model does not exploit information on within-infection allele frequencies). 
 
-Beware: this readme is seven years late and hasitily added. Package documentation is bare-bones. I'm in the process of checking for bugs (I need to check expand.grid()).  
+Beware: this readme is seven years late and hasitily added. Package documentation is bare-bones.
 
 The model used to estimate frequencies was first described here:
 [Taylor et al. 2014](https://malariajournal.biomedcentral.com/articles/10.1186/1475-2875-13-102)
@@ -17,6 +17,15 @@ A comprehensive discription of the model can be found here:
 [Thesis_methods_chapter](https://github.com/aimeertaylor/FreqEstimationModel/blob/master/inst/Thesis_methods_chapter.pdf)
 
 Follow the code below to install the model. Thereafter, download the files in the Inst folder and run Test_run.R from within the downloaded folder (I need to make this into a vignette). 
+
+Please email me (aimee.taylor@pasteur.fr) if you find any bugs. 
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+Note-to-self: ignoring roxygen2 Encoding: "UTF-8" warning for now as no special characters in documention (see https://stackoverflow.com/questions/51694929/warning-about-utf-8-with-roxygen2). 
+
+
 
 ```r
 install.packages("devtools")
