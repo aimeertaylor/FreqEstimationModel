@@ -4,9 +4,13 @@
 \alias{mcmc_sampling}
 \title{MCMC}
 \usage{
-mcmc_sampling(processed_data_list, moi_list, frequency_list, mcmc_variable_list)
+mcmc_sampling(
+  processed_data_list,
+  moi_list,
+  frequency_list,
+  mcmc_variable_list
+)
 }
 \description{
 Function to implement mcmc sampler, which is embedded within data preprocessing and retrospective posterior calculations
 }
-

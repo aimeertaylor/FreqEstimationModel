@@ -6,7 +6,23 @@
 \usage{
 compatible_genotypes(observation, as_numeric = TRUE)
 }
+\arguments{
+\item{observation}{A vector of allelic calls for a given individual, with one
+call per loci. Heteroallelic loci can either be encoded as 0.5.
+Alternatively, all alleles detected at heteroallelic loci can be listed.
+See examples below.}
+}
 \description{
 Function to ascertain the genotypes that are compatible with a given observation
 }
+\examples{
+# Example where heteroallelic loci are encoded as 0.5
+y <- c(0, 1, 0.5, 0.5)
+compatible_genotypes(y)
+compatible_genotypes(y, FALSE)
 
+# Example where all alleles detected at heteroallelic loci are listed
+y <- list(0, 1, c(0,1), c(0,1,2))
+compatible_genotypes(y)
+compatible_genotypes(y, FALSE)
+}

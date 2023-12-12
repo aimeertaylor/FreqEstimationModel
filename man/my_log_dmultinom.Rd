@@ -10,4 +10,3 @@ my_log_dmultinom(x, prob, pop_fequency)
 Function to calculate the density of multiple realisations of the multinomial distribution
 simultaneously given either a single probability or a matrix of probability
 }
-

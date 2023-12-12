@@ -4,10 +4,12 @@
 \alias{draw_genotype_counts_initial}
 \title{Draw initial genotype counts}
 \usage{
-draw_genotype_counts_initial(moi_current, processed_data_list,
-  frequency_current)
+draw_genotype_counts_initial(
+  moi_current,
+  processed_data_list,
+  frequency_current
+)
 }
 \description{
 Function for drawing initial genotype counts.
 }
-

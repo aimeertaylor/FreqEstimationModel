@@ -9,4 +9,3 @@ draw_frequency_proposed_child(Alpha, genotype_counts_current)
 \description{
 Function for drawing frequency proposed per child
 }
-

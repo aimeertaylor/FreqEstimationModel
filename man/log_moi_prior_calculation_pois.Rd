@@ -9,4 +9,3 @@ log_moi_prior_calculation_pois(moi_store, moi_list, y_no_mxed, y_mxed)
 \description{
 Log moi prior calculation
 }
-

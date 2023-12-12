@@ -4,10 +4,13 @@
 \alias{update_genotype_counts}
 \title{Update genotype counts}
 \usage{
-update_genotype_counts(moi_diff, genotype_counts_current,
-  current_genotype_counts_truncated, processed_data_list)
+update_genotype_counts(
+  moi_diff,
+  genotype_counts_current,
+  current_genotype_counts_truncated,
+  processed_data_list
+)
 }
 \description{
 Function to update genotype counts conditional on current genotype counts and new multiplicity of infection (MOI)
 }
-

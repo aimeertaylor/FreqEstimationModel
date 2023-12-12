@@ -28,4 +28,3 @@ Note that, \code{y_no_mxed} and \code{y_mxed} are disjoints sets that together u
 \description{
 Function for drawing initial MOIs.
 }
-

@@ -12,4 +12,3 @@ Same as the rdirichlet function in MCMCpack but rewritten to minimise dependenci
 \details{
 Need to add log option
 }
-

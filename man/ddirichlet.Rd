@@ -9,4 +9,3 @@ ddirichlet(x, alpha)
 \description{
 Calculate the density of the dirichlet distribution. This function is exactly the same as that from MCMCpack, copied to minimise dependencies.
 }
-

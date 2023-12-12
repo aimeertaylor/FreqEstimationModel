@@ -9,4 +9,3 @@ data_genotype_count_compatibility(comp_genotypes, genotype_counts, raw_data)
 \description{
 Data and genotype compatibility check function
 }
-

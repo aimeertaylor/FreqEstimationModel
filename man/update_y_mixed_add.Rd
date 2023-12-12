@@ -9,4 +9,3 @@ update_y_mixed_add(to_update, genotype_counts_mixed_add, frequency_truncated)
 \description{
 Function for addition of clone to a mixed data sample
 }
-

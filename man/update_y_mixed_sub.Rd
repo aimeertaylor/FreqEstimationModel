@@ -4,10 +4,12 @@
 \alias{update_y_mixed_sub}
 \title{Update mixed data samaple clone removal}
 \usage{
-update_y_mixed_sub(to_update, genotype_counts_mixed_sub,
-  genotype_counts_truncated)
+update_y_mixed_sub(
+  to_update,
+  genotype_counts_mixed_sub,
+  genotype_counts_truncated
+)
 }
 \description{
 Function for removal of clone from mixed data sample
 }
-

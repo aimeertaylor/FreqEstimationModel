@@ -4,10 +4,14 @@
 \alias{preprocess_data}
 \title{Preprocess data}
 \usage{
-preprocess_data(data_summary, log_like_zero, NGS, augment_missing_data,
-  moi_prior_min2)
+preprocess_data(
+  data_summary,
+  log_like_zero,
+  NGS,
+  augment_missing_data,
+  moi_prior_min2
+)
 }
 \description{
 Function to preprocess data
 }
-

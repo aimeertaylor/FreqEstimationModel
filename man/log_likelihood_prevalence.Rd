@@ -9,4 +9,3 @@ log_likelihood_prevalence(processed_data_list, genotype_counts)
 \description{
 Calculate log likelihood of prevalence data
 }
-

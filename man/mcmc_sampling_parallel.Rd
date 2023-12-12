@@ -4,10 +4,14 @@
 \alias{mcmc_sampling_parallel}
 \title{MCMC}
 \usage{
-mcmc_sampling_parallel(processed_data_list, moi_list, frequency_list,
-  mcmc_variable_list, cores_max)
+mcmc_sampling_parallel(
+  processed_data_list,
+  moi_list,
+  frequency_list,
+  mcmc_variable_list,
+  cores_max
+)
 }
 \description{
 Function to implement mcmc sampler chains in parallel, followed retrospective posterior calculations
 }
-

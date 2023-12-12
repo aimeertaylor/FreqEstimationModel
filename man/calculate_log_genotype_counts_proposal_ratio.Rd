@@ -4,11 +4,17 @@
 \alias{calculate_log_genotype_counts_proposal_ratio}
 \title{Calculate the log genotype counts proposal ratio}
 \usage{
-calculate_log_genotype_counts_proposal_ratio(moi_diff, genotype_counts_diff,
-  neg_log_sum_frequency_truncated, mh_genotype_counts_truncated, y_character,
-  log_target_ratio, datasampleID, no_total)
+calculate_log_genotype_counts_proposal_ratio(
+  moi_diff,
+  genotype_counts_diff,
+  neg_log_sum_frequency_truncated,
+  mh_genotype_counts_truncated,
+  y_character,
+  log_target_ratio,
+  datasampleID,
+  no_total
+)
 }
 \description{
 Function to calculate the log genotype counts proposal ratio
 }
-
