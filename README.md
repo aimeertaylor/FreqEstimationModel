@@ -5,11 +5,11 @@ An R package developed to estimate population-level frequencies of genetic marke
 - genetic markers of antimalarial resistance are either alleles at single biallelic SNPs or sequences of alleles (haplotypes) over a small number of biallelic SNPs (at most seven) in the malaria parasite genome;
 - population-level parasite frequencies (vs within-infection parasite frequencies) are estimated by jointly modelling parasite genetic data on many infections, including those
 that contain genetically distinct parasites (i.e., those that are polyclonal);
-- parasite genetic data are prevalence data (i.e., they describe the presence of alleles). A non-default version of the model does exploit information from read-depths (see note on chapter 6 below) but it was never published. 
+- parasite genetic data are prevalence data (i.e., they describe the presence of alleles). A non-default version of the model does exploit information on read-depths (see note on chapter 6 below), but it has not been peer-reviewed. 
 
 ## Current state
 
-Beware: this readme is seven years late and hasitily added. Package documentation is bare-bones. I wrote this code during my PhD. It is the first code I ever made public. It is far from perfect, but better public than private (I hope). 
+Beware: this readme is seven years late and hasitily added. Package documentation is bare-bones. I wrote this code during my PhD. It is the first code I ever made public. It is far from perfect, but better public than private (I hope). Please email me (aimee.taylor@pasteur.fr) if you find any bugs.  
 
 ## More information 
 
@@ -22,14 +22,11 @@ The code was first made available in conjunction with this publication:
 A comprehensive description of the model can be found here:
 [methodological chapter of PhD thesis](https://github.com/aimeertaylor/FreqEstimationModel/blob/master/inst/Thesis_methods_chapter.pdf)
 
-Various aspects of the code are specific to unpublished chapters of my PhD ([full thesis](https://ora.ox.ac.uk/objects/uuid:c192e7cb-b6e0-4e23-a880-de46d668ef07)). For example, accounting for inter-child variability when data come from children who experience multiple episodes (chapter 5) and using information in read depth data from short-read sequencing (chapter 6). 
-
+Various aspects of the code are specific to unpublished chapters of my PhD ([full thesis](https://ora.ox.ac.uk/objects/uuid:c192e7cb-b6e0-4e23-a880-de46d668ef07)). For example, accounting for inter-child variability when data come from children who experience multiple episodes (chapter 5) and using read-depth information from short-read sequencing data (chapter 6). 
 
 ## Installation and use
 
 Follow the code below to install the model. Thereafter, download the files in the Inst folder and run Test_run.R from within the downloaded folder (I need to make this into a vignette). 
-
-Please email me (aimee.taylor@pasteur.fr) if you find any bugs. 
 
 ```r
 install.packages("devtools")
