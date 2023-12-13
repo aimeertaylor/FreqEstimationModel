@@ -25,7 +25,7 @@ visualise_results <- function(results,                  # list; results saved in
                         'grDevices')
   # Load packages, returning an error if not installed (see )
   for(i in 1:length(desired_packages)){
-    library(unloaded_desired_packages[i], character.only = TRUE)
+    library(desired_packages[i], character.only = TRUE)
   }
   #======================================================================================================
 
