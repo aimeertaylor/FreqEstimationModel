@@ -10,16 +10,17 @@ load(sprintf('./Data_no_markers%s_seed%s.RData', no_markers, data_seed)) # Load 
 
 # Summary of simulated data
 str(data_summary)
-# Note that, in the simulated data, the columns with prevalance data
-# are labeled locas1... The MOI is the 'true', simulated MOI
-# The subsequent columns are the 'true', simulated haplotype counts
+
+# Note that, in the simulated data, the columns with prevalence data
+# are labelled locus1... The MOI is the 'true' simulated MOI.
+# The subsequent columns are the 'true' simulated haplotype counts.
 head(data_summary$Data)
 
 thinning_interval <- 1 # Change this variable to increase the number of iterations per chain that are not saved in memory
-no_traces_preburnin <- 10000 # For more traces but managable pdfs, don't exceed 10k and increase thinning interval instead.
+no_traces_preburnin <- 10000 # For more traces but manageable pdf plots, don't exceed 10k and increase thinning interval instead.
 
 # MCMC variables
-no_mcmc_chains <- 3 # Number of mcmcm chains to run
+no_mcmc_chains <- 3 # Number of MCMC chains to run
 parallel <- FALSE # Set to true if running code in parallel (this option isn't active yet)
 NGS <- FALSE # Set to true if data are in NGS format (this option isn't active yet)
 log_like_zero <- FALSE # QC check; set log(p(yi|ai)) to zero (only impacts NGS) and wipes data (see below)
@@ -31,16 +32,17 @@ mcmc_variable_list <- list(no_mcmc_chains = no_mcmc_chains,
 
 
 # MOI variables
-if(log_like_zero){ # When log_like_zero == TRUE, code should return the prior, hence use a prior that is easy to eye-ball
+if (log_like_zero) { # When log_like_zero == TRUE, code should return the prior, hence use a prior that is easy to eye-ball
   moi_prior <- 'Uniform'
 } else {
   moi_prior <- 'Poisson' # Choose between 'Uniform', 'Poisson', 'Geometric' or 'nBinomial'
 }
-moi_max <- 8 # Maximum MOI regarded as possible by the model (haven't tested beyond 20)
-moi_hyperparameter <- 3 # Specify mean MOI (Hyperparameter for the prior on the MOI)
-moi_size_hyperparameter <- 0.5 # Only applies if moi_prior == 'nBinomial' (Hyperparameter for the prior on the MOI in the prior is the negative Binomial)
+
+moi_max <- 8 # Maximum MOI regarded as possible by the model (I haven't tested beyond 20)
+moi_hyperparameter <- 3 # Specify population-average MOI (parameter of the prior on the MOI)
+moi_size_hyperparameter <- 0.5 # Only applies if moi_prior == 'nBinomial' (hyperparameter for the prior on the MOI if the prior is the negative Binomial)
 moi_prior_min2 <- NULL # Specify the lower bound for the MOI per individual
-moi_initial <- NULL # If null, the initial vector of multiplicties of infection (MOI) is set internally, otherwise set to inputted moi_initial
+moi_initial <- NULL # If null, the initial vector of multiplicities of infection (MOI) is set internally, otherwise set to input moi_initial
 moi_list <- list(moi_hyperparameter = moi_hyperparameter,
                  moi_size_hyperparameter = moi_size_hyperparameter,
                  moi_prior = moi_prior,
@@ -62,9 +64,10 @@ processed_data_list <- preprocess_data(data_summary,
                                        moi_prior_min2)
 
 
+
 # frequency variables
-frequency_hyperparameter <-rep(1,processed_data_list$no_haplotypes) # The Parameter vector for the dirichlet prior on the frequency estimate
-frequency_initial <- NULL # If null, external_frequency_initial set internally, otherwise set to inputted external_frequency_initial
+frequency_hyperparameter <-rep(1,processed_data_list$no_haplotypes) # The Parameter vector for the Dirichlet prior on the frequency estimate
+frequency_initial <- NULL # If null, external_frequency_initial set internally, otherwise set to input external_frequency_initial
 frequency_list <- list(frequency_hyperparameter = frequency_hyperparameter,
                        frequency_initial = frequency_initial)
 
@@ -72,42 +75,78 @@ frequency_list <- list(frequency_hyperparameter = frequency_hyperparameter,
 # Run MCMC
 set.seed(1) # Set seed for reproducibility
 results <- mcmc_sampling_parallel(processed_data_list,
-                         moi_list,
-                         frequency_list,
-                         mcmc_variable_list,
-                         cores_max = 3)
+                                  moi_list,
+                                  frequency_list,
+                                  mcmc_variable_list,
+                                  cores_max = 3)
 
 
 # Save results
 arguments <- names(as.list(args(mcmc_sampling)))
 arguments <- arguments[-length(arguments)]
-if(!log_like_zero){
-  dataset<-'Data'
-} else {
+if(log_like_zero){
   dataset<-'QC'
-} # Class character: set to dataset name in order to save pdf with data set name if REAL=TRUE and to apend if REAL=FALSR
+} else {
+  dataset <- 'Data'
+}
 filename <- sprintf('%s_%sIterations_NoMarkers%s_NGS%s_LogLikeZero%s_seed%s',dataset, no_traces_preburnin*thinning_interval, no_markers, NGS, log_like_zero, data_seed)
 save(list = c('results', arguments), file = sprintf('./%s.RData', filename))
 
 
+# ==============================================================================
+# Quick summary of frequency results
+# To check for convergence etc. the mcmc chains should be interrogated before
+# reporting results. For convenience during my PhD, I atomised this using
+# visualise_results() - see below - which I should have called interrogate
+# results or something similar. To see how the interrogation is done manually,
+# set child = FALSE, Simulated = TRUE, open visualise_results.R, and run the
+# code chunk-by-chunk.
+# ==============================================================================
 
-# # Generate pdf of results
-# # Needs de-bugging:
-# source('./visualise_results.R')
-# visualise_results(results,
-#                   data_summary,
-#                   PDF = sprintf('./%s.pdf', filename),
-#                   child = FALSE,
-#                   augment_missing_data,
-#                   Simulated = TRUE)
+# First generate numerical approximations of posteriors by removing burn-in
+if(mcmc_variable_list$no_mcmc_chains > 1){
+  alply_genotype_freq_store_chains_burnin <- alply(results$genotype_freq_store_chains[-burnin,,],3)
+}else{
+  alply_genotype_freq_store_chains_burnin <- results$genotype_freq_store_chains[-burnin,,]
+}
+
+# Use mcmc.list to represent frequency chains across parallel runs (see ?mcmc.list)
+mcmc_frequency_chains <- coda::mcmc.list(lapply(alply_genotype_freq_store_chains_burnin, # 3 for splitting by third dimension (nothing to do with no. of chains)
+                                          coda::mcmc,
+                                          start = (max(burnin)+1)*mcmc_variable_list$thinning_interval,
+                                          end = mcmc_variable_list$no_traces_preburnin*mcmc_variable_list$thinning_interval,
+                                          thin = mcmc_variable_list$thinning_interval))
+
+# Table of frequency estimates: the haplotype names are the rownames. 001
+# represents a haplotype across three biallelic loci where zero represent
+# whatever the user encodes as zero in the input data (e.g. reference allele,
+# minor allele, sensitive allele) and one represents whatever the user encodes
+# as one (e.g. non-reference allele, major allele, resistant allele)
+cbind(median = summary(mcmc_frequency_chains)$quantiles[,3],
+"CI2.5%" = summary(mcmc_frequency_chains)$quantiles[,1],
+"CI97.5%" = CI_upper<-summary(mcmc_frequency_chains)$quantiles[,5])
+
+
+# ==============================================================================
+# Full summary of frequency results
+# To check for convergence etc. the mcmc chains should be interrogated before
+# reporting results. For convenience during my PhD, I atomised this using
+# visualise_results() - see below - which I should have called interrogate
+# results or something similar. To see how the interrogation is done manually,
+# set child = FALSE, Simulated = TRUE, open visualise_results.R, and run the
+# code chunk-by-chunk.
+# ==============================================================================
+# Generate pdf of results
+source('./visualise_results.R') # Should have called this process results or similar
+visualise_results(results,
+                  data_summary,
+                  PDF = sprintf('./%s.pdf', filename),
+                  child = FALSE, # This relates to chapter five of my PhD thesis
+                  augment_missing_data,
+                  Simulated = TRUE)
 
 # Convergence diagnostics
-mcmc_frequency_chains <- mcmc.list(lapply(alply(results$genotype_freq_store_chains, no_mcmc_chains), mcmc))
+mcmc_frequency_chains <- coda::mcmc.list(lapply(alply(results$genotype_freq_store_chains, no_mcmc_chains), coda::mcmc))
 gelman.diag(mcmc_frequency_chains, transform = TRUE, multivariate = FALSE) # Transformed (using log or logit) to improve the normality of the distribution
-
-
-
-
-
 
 

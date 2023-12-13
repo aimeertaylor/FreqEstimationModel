@@ -57,7 +57,7 @@ visualise_results <- function(results,                  # list; results saved in
   burnin <- 1:(0.5*mcmc_variable_list$no_traces_preburnin) # remove first half
   plot_thin <- 10
   plot_thin_preburnin <- seq(1, mcmc_variable_list$no_traces_preburnin, plot_thin) # To further thin traces that include burnin
-  plot_thin_postburnin <- seq(1, mcmc_variable_list$no_traces_preburnin-max(burnin), plot_thin) # To further thin traces that dont include burnin
+  plot_thin_postburnin <- seq(1, mcmc_variable_list$no_traces_preburnin-max(burnin), plot_thin) # To further thin traces that don't include burnin
   plot_thin_preburnin_noburnin <- seq((max(burnin)+1), mcmc_variable_list$no_traces_preburnin, plot_thin)
   #======================================================================================================
 
@@ -75,7 +75,7 @@ visualise_results <- function(results,                  # list; results saved in
                                             end = mcmc_variable_list$no_traces_preburnin*mcmc_variable_list$thinning_interval,
                                             thin = mcmc_variable_list$thinning_interval))
 
-  mcmc_As <- abind(alply(results$genotype_count_store_chains[-burnin,,,],4), along = 1) # Haplotype counts for all chains discluding burn in
+  mcmc_As <- abind(alply(results$genotype_count_store_chains[-burnin,,,],4), along = 1) # Haplotype counts for all chains excluding burn in
   mcmc_mois <- apply(mcmc_As,c(1,2),sum)
   #========================================================================================================
 
@@ -232,7 +232,7 @@ visualise_results <- function(results,                  # list; results saved in
   title(sub = sprintf('In addition to the thinning interval used to generate results, thinned by %s', plot_thin), cex.sub = 0.5)
   #========================================================================================================
 
-  # #========================================================================================================
+  #========================================================================================================
   # # Plot the posterior (including burnin, although ylim based on post burnin)
   # plot(NULL, ylim = range(results$log_posterior_store_chains[-burnin,])-c(10, 0), xaxt = 'n', yaxt = 'n',
   #      xlim = c(0, mcmc_variable_list$no_traces_preburnin), bty ='n', ylab = 'Log posterior', xlab = 'Trace', cex.lab = 1.2)
@@ -252,7 +252,7 @@ visualise_results <- function(results,                  # list; results saved in
   # legend('bottom', legend = paste('Chain', 1:mcmc_variable_list$no_mcmc_chains),lty = 'solid', col = chain_cols, cex = 1, bty = 'n')
   #
   # title(sub = sprintf('In addition to the thinning interval used to generate results, thinned by %s', plot_thin), cex.sub = 0.5)
-  # #========================================================================================================
+  #========================================================================================================
 
   #========================================================================================================
   # Traces (including burnin, although ylim based on post burnin)
@@ -357,11 +357,13 @@ visualise_results <- function(results,                  # list; results saved in
                   cex = 0.1,
                   cex.title = 0.1,
                   colorkey=list(space='right', # Colour bar parameters
-                                col=gray(moi_list$moi_max:0/moi_list$moi_max),
-                                at = 0:9+0.5,
+                                col = gray(moi_list$moi_max:0/moi_list$moi_max),
+                                at = 0:(moi_max+1),
                                 width=0.4,
                                 height=1,
-                                labels=list(cex=0.4,labels=paste('Count: ',0:moi_list$moi_max,sep=''))),
+                                labels=list(labels = paste('Count: ',0:moi_list$moi_max,sep=''),
+                                            at = 0:moi_max+0.5,
+                                            cex = 0.5)),
                   scales=list(x=list(tick.number=3, # Axis parameters
                                      label='',
                                      at=1,
@@ -372,6 +374,7 @@ visualise_results <- function(results,                  # list; results saved in
                               y=list(tick.number=no_haplotypes,
                                      alternating=c(1,rep(0,1)),
                                      tck=0,
+                                     at=1:length(dimnames(X)[[2]]),
                                      labels=dimnames(X)[[2]],
                                      cex=0.3))))
   #=================================================================================================================
@@ -415,7 +418,9 @@ visualise_results <- function(results,                  # list; results saved in
                                 tick.number=9,
                                 width=0.4,
                                 height=1,
-                                labels=list(cex=0.5,labels=paste('MOI:',1:moi_list$moi_max,sep=''))),  # No MOI=0
+                                labels=list(cex=0.5,
+                                            at = 1:moi_list$moi_max,
+                                            labels=paste('MOI:',1:moi_list$moi_max,sep=''))),  # No MOI=0
                   scales=list(x=list(label='',
                                      at=1,
                                      tck=0,# Length of tick marks is zero
