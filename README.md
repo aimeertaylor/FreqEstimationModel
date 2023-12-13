@@ -26,7 +26,7 @@ Various aspects of the code are specific to unpublished chapters of my PhD ([ful
 
 ## Installation and use
 
-Follow the code below to install the model. Thereafter, download the files in the Inst folder and run Test_run.R from within the downloaded folder (I need to make this into a vignette). 
+Follow the code below to install the model. Thereafter, download the files in the Inst folder and run Test_run.R from within the downloaded folder (I need to make this into a vignette), taking care with the relative path used to load example data. 
 
 ```r
 install.packages("devtools")
