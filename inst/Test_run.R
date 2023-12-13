@@ -104,6 +104,7 @@ save(list = c('results', arguments), file = sprintf('./%s.RData', filename))
 # ==============================================================================
 
 # First generate numerical approximations of posteriors by removing burn-in
+burnin <- 1:(0.5*mcmc_variable_list$no_traces_preburnin) # remove first half
 if(mcmc_variable_list$no_mcmc_chains > 1){
   alply_genotype_freq_store_chains_burnin <- plyr::alply(results$genotype_freq_store_chains[-burnin,,],3)
 }else{
