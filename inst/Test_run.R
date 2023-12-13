@@ -109,7 +109,9 @@ desired_packages <- c('coda','plyr')
 uninstalled_desired_packages <- desired_packages[!desired_packages %in% installed_packages]
 if(length(uninstalled_desired_packages) > 0){
   install.packages(uninstalled_desired_packages)
-  sapply(uninstalled_desired_packages, library, charactar.only = T)
+  for(i in 1:length(uninstalled_desired_packages)){
+    library(uninstalled_desired_packages[i])
+  }
 }
 
 # First generate numerical approximations of posteriors by removing burn-in
