@@ -31,7 +31,7 @@ Follow the code below to install the model. Thereafter, download the files in th
 ```r
 install.packages("devtools")
 
-devtools::install_github("aimeertaylor/FreqEstimationModel", build_vignettes = TRUE)
+devtools::install_github("aimeertaylor/FreqEstimationModel", build_vignettes = TRUE, dependencies = TRUE)
 
 library(FreqEstimationModel)
 
