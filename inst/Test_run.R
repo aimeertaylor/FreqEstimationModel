@@ -103,6 +103,15 @@ save(list = c('results', arguments), file = sprintf('./%s.RData', filename))
 # code chunk-by-chunk.
 # ==============================================================================
 
+# Install, load and attach requried packages if not already
+installed_packages <- rownames(installed.packages())
+desired_packages <- c('coda','plyr')
+uninstalled_desired_packages <- desired_packages[!desired_packages %in% installed_packages]
+if(length(uninstalled_desired_packages) > 0){
+  install.packages(uninstalled_desired_packages)
+  sapply(uninstalled_desired_packages, library, charactar.only = T)
+}
+
 # First generate numerical approximations of posteriors by removing burn-in
 burnin <- 1:(0.5*mcmc_variable_list$no_traces_preburnin) # remove first half
 if(mcmc_variable_list$no_mcmc_chains > 1){
