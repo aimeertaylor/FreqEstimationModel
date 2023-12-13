@@ -105,7 +105,7 @@ save(list = c('results', arguments), file = sprintf('./%s.RData', filename))
 
 # First generate numerical approximations of posteriors by removing burn-in
 if(mcmc_variable_list$no_mcmc_chains > 1){
-  alply_genotype_freq_store_chains_burnin <- alply(results$genotype_freq_store_chains[-burnin,,],3)
+  alply_genotype_freq_store_chains_burnin <- plyr::alply(results$genotype_freq_store_chains[-burnin,,],3)
 }else{
   alply_genotype_freq_store_chains_burnin <- results$genotype_freq_store_chains[-burnin,,]
 }
@@ -146,7 +146,7 @@ visualise_results(results,
                   Simulated = TRUE)
 
 # Convergence diagnostics
-mcmc_frequency_chains <- coda::mcmc.list(lapply(alply(results$genotype_freq_store_chains, no_mcmc_chains), coda::mcmc))
-gelman.diag(mcmc_frequency_chains, transform = TRUE, multivariate = FALSE) # Transformed (using log or logit) to improve the normality of the distribution
+mcmc_frequency_chains <- coda::mcmc.list(lapply(plyr::alply(results$genotype_freq_store_chains, no_mcmc_chains), coda::mcmc))
+coda::gelman.diag(mcmc_frequency_chains, transform = TRUE, multivariate = FALSE) # Transformed (using log or logit) to improve the normality of the distribution
 
 

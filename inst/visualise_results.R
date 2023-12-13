@@ -15,8 +15,6 @@ visualise_results <- function(results,                  # list; results saved in
   #======================================================================================================
 
   #======================================================================================================
-  # Install packages if not already
-  installed_packages <- rownames(installed.packages())
   desired_packages <- c('MCMCpack',# For correlation plots
                         'car',     # for conversion between an array and list
                         'plyr',    # For text plot and confidence intervals
@@ -25,21 +23,9 @@ visualise_results <- function(results,                  # list; results saved in
                         'vioplot', # For posterior frequency plots
                         'abind',
                         'grDevices')
-  uninstalled_desired_packages <- desired_packages[!desired_packages %in% installed_packages]
-  if(length(uninstalled_desired_packages) > 0){
-    install.packages(uninstalled_desired_packages)
-  }
-  #======================================================================================================
-
-
-  #======================================================================================================
-  # Load packages if not already
-  loaded_packages <- search()
-  unloaded_desired_packages <- desired_packages[!paste('package:', desired_packages, sep = '') %in% loaded_packages]
-  if(length(unloaded_desired_packages) > 0){
-    for(i in 1:length(unloaded_desired_packages)){
-      require(unloaded_desired_packages[i], character.only = TRUE)
-    }
+  # Load packages, returning an error if not installed (see )
+  for(i in 1:length(desired_packages)){
+    library(unloaded_desired_packages[i], character.only = TRUE)
   }
   #======================================================================================================
 

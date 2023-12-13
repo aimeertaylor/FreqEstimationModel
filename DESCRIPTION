@@ -1,10 +1,21 @@
-Package: FreqEstimationModel
 Type: Package
+Package: FreqEstimationModel
 Title: What the Package Does (Title Case)
 Version: 0.1
 Date: 2015-08-02
-Authors: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
+Suggests: 
+    abind,
+    car,
+    gplots,
+    grDevices,
+    lattice,
+    MCMCpack,
+    plyr,
+    vioplot
+Authors: person("First", "Last", email = "first.last@example.com", role =
+    c("aut", "cre"))
+Encoding: UTF-8
 LazyData: FALSE
 RoxygenNote: 7.2.3
