@@ -1,0 +1,28 @@
+---
+title: "Example_haplotypes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example_haplotypes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(FreqEstimationModel)
+rm(list = ls()) # For cleanliness 
+set.seed(1) # For reproducibility
+```
+
+```{r}
+# Select data to run; returns data_summary
+no_markers <- 3
+data_seed <- 2
+load(sprintf('../inst/Data_no_markers%s_seed%s.RData', no_markers, data_seed)) # Load data (XXX)
+```
