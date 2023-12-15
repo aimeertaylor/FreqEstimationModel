@@ -94,27 +94,16 @@ save(list = c('results', arguments), file = sprintf('./%s.RData', filename))
 
 
 # ==============================================================================
-# Quick summary of frequency results
-# To check for convergence etc. the mcmc chains should be interrogated before
-# reporting results. For convenience during my PhD, I atomised this using
-# visualise_results() - see below - which I should have called interrogate
-# results or something similar. To see how the interrogation is done manually,
-# set child = FALSE, Simulated = TRUE, open visualise_results.R, and run the
-# code chunk-by-chunk.
+# Quick example of estimates that can be extracted from results.
+# N.B. Before reporting estimates, MCMC convergence should be checked; see below.
 # ==============================================================================
 
-# Install, load and attach requried packages if not already
-installed_packages <- rownames(installed.packages())
-desired_packages <- c('coda','plyr')
-uninstalled_desired_packages <- desired_packages[!desired_packages %in% installed_packages]
-if(length(uninstalled_desired_packages) > 0){
-  install.packages(uninstalled_desired_packages)
-  for(i in 1:length(uninstalled_desired_packages)){
-    library(uninstalled_desired_packages[i])
-  }
-}
+# Install, load, and attach packages that are helpful for unpacking results
+if(!require("plyr")) install.packages("plyr")
+if(!require("coda")) install.packages("coda")
+if(!require("abind")) install.packages("abind")
 
-# First generate numerical approximations of posteriors by removing burn-in
+# Generate numerical approximations of posteriors by removing burn-in
 burnin <- 1:(0.5*mcmc_variable_list$no_traces_preburnin) # remove first half
 if(mcmc_variable_list$no_mcmc_chains > 1){
   alply_genotype_freq_store_chains_burnin <- plyr::alply(results$genotype_freq_store_chains[-burnin,,],3)
@@ -122,21 +111,85 @@ if(mcmc_variable_list$no_mcmc_chains > 1){
   alply_genotype_freq_store_chains_burnin <- results$genotype_freq_store_chains[-burnin,,]
 }
 
-# Use mcmc.list to represent frequency chains across parallel runs (see ?mcmc.list)
-mcmc_frequency_chains <- coda::mcmc.list(lapply(alply_genotype_freq_store_chains_burnin, # 3 for splitting by third dimension (nothing to do with no. of chains)
-                                          coda::mcmc,
-                                          start = (max(burnin)+1)*mcmc_variable_list$thinning_interval,
-                                          end = mcmc_variable_list$no_traces_preburnin*mcmc_variable_list$thinning_interval,
-                                          thin = mcmc_variable_list$thinning_interval))
 
-# Table of frequency estimates: the haplotype names are the rownames. 001
-# represents a haplotype across three biallelic loci where zero represent
-# whatever the user encodes as zero in the input data (e.g. reference allele,
-# minor allele, sensitive allele) and one represents whatever the user encodes
-# as one (e.g. non-reference allele, major allele, resistant allele)
-cbind(median = summary(mcmc_frequency_chains)$quantiles[,3],
-"CI2.5%" = summary(mcmc_frequency_chains)$quantiles[,1],
-"CI97.5%" = CI_upper<-summary(mcmc_frequency_chains)$quantiles[,5])
+# Use mcmc.list to represent frequency chains across parallel runs (see ?coda::mcmc.list)
+mcmc_frequency_chains <- coda::mcmc.list(lapply(alply_genotype_freq_store_chains_burnin, # 3 for splitting by third dimension (nothing to do with no. of chains)
+                                                coda::mcmc,
+                                                start = (max(burnin)+1)*mcmc_variable_list$thinning_interval,
+                                                end = mcmc_variable_list$no_traces_preburnin*mcmc_variable_list$thinning_interval,
+                                                thin = mcmc_variable_list$thinning_interval))
+
+mcmc_As <- abind::abind(plyr::alply(results$genotype_count_store_chains[-burnin,,,],4), along = 1) # Haplotype counts for all chains excluding burn in
+mcmc_mois <- apply(mcmc_As, c(1,2), sum)
+
+# Extract population-level frequency estimates:
+# Haplotype names are the rownames. For example, 001 represents a haplotype across three biallelic loci where zero
+# represent whatever the user encodes as zero in the input data (e.g. reference
+# allele, minor allele, sensitive allele) and one represents whatever the user
+# encodes as one (e.g. non-reference allele, major allele, resistant allele)
+pop_freq <- cbind(mean = summary(mcmc_frequency_chains)$statistics[,"Mean"],
+                      median = summary(mcmc_frequency_chains)$quantiles[,3],
+                      "CI2.5%" = summary(mcmc_frequency_chains)$quantiles[,1],
+                      "CI97.5%" = CI_upper<-summary(mcmc_frequency_chains)$quantiles[,5])
+
+# Extract per-sample MOI estimates:
+compute_mode <- function(x) {z <- table(x); names(z)[which.max(z)]}
+qprobs <- c(0.025, 0.5, 0.975)
+ind_MOI <- data.frame(colMeans(mcmc_mois),
+                          as.numeric(apply(mcmc_mois, 2, compute_mode)),
+                          t(apply(mcmc_mois, 2, quantile, probs = qprobs)))
+colnames(ind_MOI) <- c("mean","mode","median","CI2.5%","CI97.5%")
+
+# Extract per-sample most likely combination of phased haplotypes
+mode_hap_count_chr <- apply(mcmc_As, 2, function(x) {compute_mode(apply(x, 1, paste, collapse = ""))})
+ind_As<- t(sapply(mode_hap_count_chr, function(x) as.numeric(strsplit(x, split = "")[[1]])))
+colnames(mode_hap_count_num) <- dimnames(mcmc_As)[[3]]
+
+# Prevalence estimates
+# The prevalence of a haplotype is the proportion of samples that contain that haplotype
+# Since we can't observe haplotypes directly, we cannot compute it directly
+# However, there are various ways we can estimate it using the results above
+
+# Using the population-level frequencies at the population-level:
+# We can estimate population-level prevalence using the population-frequencies and
+# some population measure of the moi:
+# The probability that one or more clones in the infection have the ith haplotype is one minus the probability that no clones
+# in the infection have the ith haplotype:
+pop_prev <- 1-(1-pop_freq)^median(mcmc_mois)
+
+# At the sample-level using per-sample haplotype counts:
+ind_prev <- t(apply(mcmc_As, 2, function(x) colMeans(x > 0)))
+ind_freq <- t(apply(mcmc_As, 2, function(x) colMeans(x / rowSums(x))))
+
+# Print posterior estimates:
+ind_MOI # sample-level MOI estimates
+ind_As # sample-level estimates of phased haplotype counts
+ind_prev # individual prevalence estimates
+ind_freq # individual frequency estimates
+pop_freq # population-level frequency estimates
+pop_prev # population prevalence estimates
+
+# At the population-level using per-sample haplotype count estimates:
+plot(x = pop_prev[,"median"], y = colMeans(ind_prev), pch = 20, bty = "n",
+     xlim = c(0,1), ylim = c(0,1),
+     main = "Probability that a haplotype is found in any given infection",
+     xlab = "based on posterior population-level median estimates",
+     ylab = "based on posterior per-sample haplotype count distribution")
+text(x = pop_prev[,"median"], y = colMeans(ind_prev),
+     labels = rownames(pop_prev), pos = 4, xpd = NA)
+abline(a = 0, b = 1, lty = "dashed")
+
+# At the population-level using per-sample haplotype frequency estimates
+plot(x = pop_freq[,"mean"], y = colMeans(ind_freq), pch = 20, bty = "n",
+     xlim = c(0,1), ylim = c(0,1),
+     main = "Population-level haplotype frequency",
+     xlab = "Parameter estimate",
+     ylab = "Based on posterior per-sample haplotype frequency estimates")
+text(x = pop_freq[,"mean"], y = colMeans(ind_freq),
+     labels = rownames(pop_prev), pos = 4, xpd = NA)
+abline(a = 0, b = 1, lty = "dashed")
+
+
 
 
 # ==============================================================================
