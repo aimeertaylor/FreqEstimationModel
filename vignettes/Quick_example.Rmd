@@ -1,0 +1,439 @@
+---
+title: "Quick_example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Quick_example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "", 
+  fig.width = 7, 
+  fig.height = 7,
+  fig.pos = 'H', 
+  dpi = 300
+)
+```
+
+```{r setup}
+library(FreqEstimationModel)
+```
+
+# Introduction 
+
+This vignette demonstrates the estimation of frequencies using simulated
+prevalence data on multiple loci. The model assumes loci are dependent and thus
+estimates haplotype frequencies. SNP-level allele frequency estimates can be
+computed by summing over haplotype frequency estimates. Otherwise, the model can
+be run separately for data on each loci in-turn. The model is fit to the data
+using a Markov chain Monte Carlo (MCMC) sampler.
+
+In the results section a brief overview of the estimates that can be generated
+is provided. These estimates include:
+
+1) population-level haplotype frequency
+2) infection-level multiplicities of infection (MOIs)
+3) infection-level phased haplotype counts
+4) infection-level haplotype frequency  
+2) population-level haplotype prevalence
+6) infection-level haplotype prevalence
+
+Noting that infection-level estimates are liable to be noisy because
+infection-level data are not very informative.
+
+Before results are reported, MCMC convergence should be checked. To see how to
+do this, and for a more comprehensive example of the results that can be
+extracted from the output of the MCMC sampler, including comparison between
+estimates and simulated truths, see Long results below.
+
+
+# Data
+
+In this vignette, simulated prevalence data are used.
+
+```{r, echo = FALSE}
+load('../data/Data_no_markers3_seed1.RData') # Load data 
+head(data_summary$Data)
+```
+
+```{r, include = FALSE}
+no_markers <- sum(grepl("locus", colnames(data_summary$Data)))
+```
+
+The model supports prevalence data on biallelic loci. For a given loci,
+
+- zero denotes the detection of user's default allele,
+- one denotes the detection of the other allele,
+- 0.5 denotes the detection of both alleles;
+
+see for example the entries of the first `r no_markers` columns of the data
+matrix above, in which are stored simulated data for patient IDs (pids) 1 to `r
+nrow(data_summary$Data)` (for brevity, only the first six pids are printed
+throughout this vignette).
+
+The user's chose of the default allele is completely arbitrary. For example,
+zero and one could denote the respective detection of the
+
+- minor and major allele (or vice versa).
+- reference and alternative allele (or vice versa).
+- allele associated with drug sensitivity and resistance (or vice versa).  
+
+In my PhD, I used zero for alleles associated with drug sensitivity.
+
+Because these data were simulated, the MOIs and per-infection haplotype counts
+are known. They are shown in the last `r ncol(data_summary$Data)-no_markers`
+columns of the data matrix above. Haplotypes are named by their allelic
+sequences. For example, 001 represents a haplotype across three biallelic loci,
+where zero represents the user's default allele and one represents the other
+allele.
+
+The first `r no_markers` columns of the data matrix exemplify the format
+required to process real data, i.e.,
+
+```{r, echo = FALSE}
+head(data_summary$Data[,1:no_markers])
+```
+
+# Inference 
+
+To infer population-level haplotype frequencies, the data are fit to a model
+whose parameters include population-level haplotype frequencies. The model is
+fit to the data using a MCMC sampler. It is a Metropolis-within-Gibbs sampler.
+To avoid searching regions of the discrete, latent variable space (i.e., the
+space of infection-level MOIs and haplotype counts) that are incompatible with
+the data (i.e., to avoid a high rejection rate), a complicated, asymmetric
+proposal distribution is used (see [PhD thesis methods
+chapter](https://github.com/aimeertaylor/FreqEstimationModel/blob/master/inst/Thesis_methods_chapter.pdf))
+
+## Preparing for inference
+
+First, set some variables of the MCMC sampler: 
+
+```{r}
+thinning_interval <- 1 # Number of iterations per chain that are not saved 
+no_traces_preburnin <- 10000 # For more traces but manageable pdf plots, don't exceed 10k and increase thinning interval instead
+no_mcmc_chains <- 3 # Number of MCMC chains to run
+parallel <- FALSE # Set to true if running code in parallel (this option isn't active yet)
+NGS <- FALSE # Set to true if data are in NGS format (this option isn't active yet)
+log_like_zero <- FALSE # QC check: sets log(p(yi|ai)) to zero (only impacts NGS)
+mcmc_variable_list <- list(no_mcmc_chains = no_mcmc_chains,
+                           no_traces_preburnin = no_traces_preburnin,
+                           thinning_interval = thinning_interval,
+                           NGS = NGS,
+                           log_like_zero = log_like_zero)
+```
+
+Next, specify what to do with observations that have missing data:
+
+```{r}
+if(!NGS | log_like_zero){ # Set to true to keep partial observations rather than discard them 
+  augment_missing_data <- TRUE 
+} else {
+  augment_missing_data <- FALSE
+}
+```
+
+Next, some variables of the model on MOIs are set: 
+
+```{r}
+if (log_like_zero) { # When log_like_zero == TRUE, code should return the prior
+  moi_prior <- 'Uniform' # Use a prior that is easy to eye-ball
+} else {
+  moi_prior <- 'Poisson' # Choose between 'Uniform', 'Poisson', 'Geometric' or 'nBinomial'
+}
+
+moi_max <- 8 # Maximum MOI regarded as possible by the model (I haven't tested beyond 20)
+moi_hyperparameter <- 3 # Specify population-average MOI (parameter of the prior on the MOI)
+moi_size_hyperparameter <- 0.5 # Only applies if moi_prior == 'nBinomial' (hyperparameter for the prior on the MOI if the prior is the negative Binomial)
+moi_prior_min2 <- NULL # Specify the lower bound for the MOI per individual
+moi_initial <- NULL # If null, the initial vector of MOIs is set internally, otherwise set to input moi_initial
+moi_list <- list(moi_hyperparameter = moi_hyperparameter,
+                 moi_size_hyperparameter = moi_size_hyperparameter,
+                 moi_prior = moi_prior,
+                 moi_max = moi_max,
+                 moi_prior_min2 = moi_prior_min2,
+                 moi_initial = moi_initial)
+```
+                 
+
+
+Next, the data are processed into a form that facilitates the MCMC sampler:
+
+```{r}
+processed_data_list <- preprocess_data(data_summary,
+                                       log_like_zero,
+                                       NGS,
+                                       augment_missing_data,
+                                       moi_prior_min2)
+```
+
+Next, some variables of the prior on population-level frequencies are set: 
+
+```{r}
+frequency_hyperparameter <-rep(1, processed_data_list$no_haplotypes) # The Parameter vector for the Dirichlet prior on the frequency vector
+frequency_initial <- NULL # If null, external_frequency_initial set internally, otherwise set to input external_frequency_initial
+frequency_list <- list(frequency_hyperparameter = frequency_hyperparameter,
+                       frequency_initial = frequency_initial)
+```
+
+## Inference
+
+The model is fit to the data using a bespoke MCMC sampler, which is coded internally:
+
+```{r}
+seed <- 1 # For reproducibility
+set.seed(seed)
+
+# Run MCMC
+results <- mcmc_sampling_parallel(processed_data_list,
+                                  moi_list,
+                                  frequency_list,
+                                  mcmc_variable_list,
+                                  cores_max = 3)
+```
+
+I recommend saving the results along with the arguments used to generate them:
+
+```{r}
+arguments <- names(as.list(args(mcmc_sampling)))
+arguments <- c(arguments[-length(arguments)], "seed")
+filename <- "Example_haplotypes"
+save(list = c('results', arguments), file = sprintf('./%s.RData', filename)) 
+```
+
+# Results
+
+In this vignette I provide a brief overview of the estimates that can be extracted
+from the output of the MCMC sampler. These include: 
+
+1) population-level haplotype frequency 
+2) infection-level MOIs
+3) infection-level phased haplotype counts
+4) infection-level haplotype frequency  
+2) population-level haplotype prevalence
+6) infection-level haplotype prevalence
+
+Noting that infection-level estimates are liable to be noisy because
+infection-level data are not very informative.
+
+Before results are reported, MCMC convergence should be checked. To see how to
+do this, and for a more comprehensive example of the results that can be
+extracted from the output of the MCMC sampler, including comparison between
+estimates and simulated truths, see Long results below.
+
+```{r}
+# Install, load, and attach packages that are helpful for unpacking example results
+if(!require("plyr")) install.packages("plyr")
+if(!require("coda")) install.packages("coda")
+if(!require("abind")) install.packages("abind")
+```
+
+### Generate frequency, MOI and haplotype count estimates
+
+First, extract the samples from the chains of the mcmc sampler, removing the so-called burnin (the samples generated before the chains have reached the stationary distribution):
+
+```{r}
+# Generate numerical approximations of posteriors by removing burnin
+burnin <- 1:(0.5*mcmc_variable_list$no_traces_preburnin) # remove first half
+if(mcmc_variable_list$no_mcmc_chains > 1){
+  alply_genotype_freq_store_chains_burnin <- plyr::alply(results$genotype_freq_store_chains[-burnin,,],3)
+}else{
+  alply_genotype_freq_store_chains_burnin <- results$genotype_freq_store_chains[-burnin,,]
+}
+
+# Use mcmc.list to represent frequency chains across parallel runs (see ?coda::mcmc.list)
+mcmc_frequency_chains <- coda::mcmc.list(lapply(alply_genotype_freq_store_chains_burnin, # 3 for splitting by third dimension (nothing to do with no. of chains)
+                                                coda::mcmc,
+                                                start = (max(burnin)+1)*mcmc_variable_list$thinning_interval,
+                                                end = mcmc_variable_list$no_traces_preburnin*mcmc_variable_list$thinning_interval,
+                                                thin = mcmc_variable_list$thinning_interval))
+
+mcmc_As <- abind::abind(plyr::alply(results$genotype_count_store_chains[-burnin,,,],4), along = 1) # Haplotype counts for all chains excluding burnin
+mcmc_mois <- apply(mcmc_As, c(1,2), sum)
+```
+
+Extract population-level haplotype frequency estimates:
+
+```{r}
+pop_freq <- cbind(mean = summary(mcmc_frequency_chains)$statistics[,"Mean"],
+                      median = summary(mcmc_frequency_chains)$quantiles[,3],
+                      "CI2.5%" = summary(mcmc_frequency_chains)$quantiles[,1],
+                      "CI97.5%" = CI_upper<-summary(mcmc_frequency_chains)$quantiles[,5])
+```
+
+Extract per-sample MOI estimates:
+
+```{r}
+compute_mode <- function(x) {z <- table(x); names(z)[which.max(z)]}
+qprobs <- c(0.025, 0.5, 0.975)
+inf_MOI <- data.frame(colMeans(mcmc_mois),
+                          as.numeric(apply(mcmc_mois, 2, compute_mode)),
+                          t(apply(mcmc_mois, 2, quantile, probs = qprobs)))
+colnames(inf_MOI) <- c("mean","mode","median","CI2.5%","CI97.5%")
+```
+
+Extract per-sample most-likely combination of phased haplotypes:
+
+```{r}
+mode_hap_count_chr <- apply(mcmc_As, 2, function(x) {compute_mode(apply(x, 1, paste, collapse = ""))})
+inf_As <- t(sapply(mode_hap_count_chr, function(x) as.numeric(strsplit(x, split = "")[[1]])))
+colnames(inf_As) <- dimnames(mcmc_As)[[3]]
+```
+
+Compute infection-level haplotype frequencies from the infection-level posterior
+distributions of haplotype counts
+
+```{r}
+# Individual sample-level haplotype frequencies
+inf_freq <- t(apply(mcmc_As, 2, function(x) colMeans(x / rowSums(x))))
+```
+
+ 
+### Generate prevalence estimates 
+
+The prevalence of a haplotype is the proportion of samples that contain that
+haplotype. Since haplotypes are not directly observable, their prevalence cannot
+be computed directly. There are various ways haplotype prevalence can be
+estimated using the output from the MCMC samplers. Some examples follow.  
+
+At the population-level using the population-level frequencies and a
+population-level estimate of the MOI (here we use the median): the probability
+that one or more clones in the infection have the ith haplotype is one minus the
+probability that no clones in the infection have the ith haplotype:
+
+```{r}
+pop_prev <- 1-(1-pop_freq)^median(mcmc_mois)
+```
+
+At the sample-level (and then at population-level) using per-sample haplotype counts:
+
+```{r}
+inf_prev <- t(apply(mcmc_As, 2, function(x) colMeans(x > 0)))
+pop_prev2 <- colMeans(inf_prev)
+```
+
+The frequencies of the alleles of the individual SNPs can also be computed:
+
+```{r}
+# Marginal allele frequencies 
+haplotypes_str <- rownames(pop_freq) 
+haplotypes_chr <- do.call(rbind, strsplit(haplotypes_str, split = ""))
+ind <- apply(haplotypes_chr, 1, function(x) x == "1") # Compute the frequency of the default allele
+allele_freq <- sapply(1:nrow(ind), function(i) sum(pop_freq[,"mean"][ind[i,]]))
+biallele_freq <- rbind(allele_freq, 1-allele_freq)
+colnames(biallele_freq) <- processed_data_list$markerID
+rownames(biallele_freq) <- c("0", "1")
+```
+
+
+## Print estimates
+
+Population-level haplotype frequencies with 95% credible intervals (CIs):
+
+```{r, echo = FALSE}
+pop_freq 
+```
+
+Infection-level MOIs with 95% credible intervals (CIs):
+
+```{r, echo = FALSE}
+head(inf_MOI) 
+```
+
+Infection-level most-likely phased haplotype counts:
+
+```{r, echo = FALSE}
+head(inf_As)
+```
+
+Infection-level haplotype frequencies: 
+
+```{r, echo = FALSE}
+t(head(inf_freq)) 
+```
+
+Population-level haplotype prevalence: 
+
+```{r, echo = FALSE}
+pop_prev 
+```
+
+Infection-level haplotype prevalence: 
+
+```{r, echo = FALSE}
+t(head(inf_prev)) 
+```
+
+SNP-level allele frequencies: 
+
+```{r, echo = FALSE}
+biallele_freq
+```
+
+
+### Additional notes
+
+High agreement between prevalence computed using population-level frequency
+estimates and from per-sample haplotype count distrubtions:
+
+```{r, out.width = "100%", echo = FALSE}
+plot(x = pop_prev[,"median"], y = pop_prev2, pch = 20, bty = "n",
+     xlim = c(0,1), ylim = c(0,1),
+     main = "Probability that a haplotype is found in any given infection",
+     xlab = "Based on posterior population-level median estimates",
+     ylab = "Based on posterior per-sample haplotype counts")
+text(x = pop_prev[,"median"], y = pop_prev2,
+     labels = rownames(pop_prev), pos = 4, xpd = NA)
+abline(a = 0, b = 1, lty = "dashed")
+```
+
+High agreement between population-level frequencies estimated directly
+(i.e., as parameters of the model) and indirectly (i.e., from per-sample
+haplotype counts):
+
+```{r, out.width = "100%", echo = FALSE}
+plot(x = pop_freq[,"mean"], y = colMeans(inf_freq), pch = 20, bty = "n",
+     xlim = c(0,1), ylim = c(0,1),
+     main = "Population-level haplotype frequency",
+     xlab = "Parameter estimate",
+     ylab = "Based on posterior per-sample haplotype counts")
+text(x = pop_freq[,"mean"], y = colMeans(inf_freq),
+     labels = rownames(pop_freq), pos = 4, xpd = NA)
+abline(a = 0, b = 1, lty = "dashed")
+```
+
+# Long results
+
+In this section I generate a static pdf of long results, which can be viewed as
+a separate vignette using XXX.
+
+```{r}
+# ==============================================================================
+# Full summary of frequency results
+# To check for convergence etc. the MCMC chains should be interrogated before
+# reporting results. For convenience during my PhD, I atomised this using
+# visualise_results() - see below - which I should have called interrogate
+# results or something similar. To see how the interrogation is done manually,
+# set child = FALSE, Simulated = TRUE, open visualise_results.R, and run the
+# code chunk-by-chunk, skipping the line beginning if(class(PDF) == 'character')
+# ==============================================================================
+# Generate pdf of results
+source('../inst/visualise_results.R') # Should have called this process results or similar
+visualise_results(results,
+                  data_summary,
+                  PDF = 'Long_results.pdf',
+                  child = FALSE, # This relates to chapter five of my PhD thesis
+                  augment_missing_data,
+                  Simulated = TRUE)
+```
+
+# Convergence diagnostics 
+
+```{r}
+mcmc_frequency_chains <- coda::mcmc.list(lapply(plyr::alply(results$genotype_freq_store_chains, no_mcmc_chains), coda::mcmc))
+coda::gelman.diag(mcmc_frequency_chains, transform = TRUE, multivariate = FALSE) # Transformed (using log or logit) to improve the normality of the distribution
+```
+
