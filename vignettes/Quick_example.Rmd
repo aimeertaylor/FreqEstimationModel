@@ -315,7 +315,9 @@ inf_prev <- t(apply(mcmc_As, 2, function(x) colMeans(x > 0)))
 pop_prev2 <- colMeans(inf_prev)
 ```
 
-The frequencies of the alleles of the individual SNPs can also be computed:
+The frequencies of the alleles of the individual SNPs can also be computed. In the following example, 
+haplotype frequency point estimates are summed over. To get CIs, sum over the distribution of haplotype
+frequencies; see [Allele_freq_estimate_compare.R](https://github.com/aimeertaylor/FreqEstimationModel/blob/master/inst/Allele_freq_estimate_compare.R). 
 
 ```{r}
 # Marginal allele frequencies 
