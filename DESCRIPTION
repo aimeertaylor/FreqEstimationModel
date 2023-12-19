@@ -15,10 +15,11 @@ Suggests:
     MCMCpack,
     plyr,
     rmarkdown,
-    vioplot
+    vioplot,
+    R.rsp
 Authors: person("First", "Last", email = "first.last@example.com", role =
     c("aut", "cre"))
 Encoding: UTF-8
 LazyData: FALSE
 RoxygenNote: 7.2.3
-VignetteBuilder: knitr
+VignetteBuilder: R.rsp, knitr
