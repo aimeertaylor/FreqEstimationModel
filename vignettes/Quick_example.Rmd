@@ -200,7 +200,7 @@ I recommend saving the results along with the arguments used to generate them:
 ```{r}
 arguments <- names(as.list(args(mcmc_sampling)))
 arguments <- c(arguments[-length(arguments)], "seed")
-filename <- "Example_haplotypes"
+filename <- "Results"
 save(list = c('results', arguments), file = sprintf('./%s.RData', filename)) 
 ```
 
