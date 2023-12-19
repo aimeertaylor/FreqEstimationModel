@@ -42,8 +42,7 @@ browseVignettes("FreqEstimationModel")
 # A quick example of results that can be generated using a simulated data set: 
 vignette("Quick_example", "FreqEstimationModel") 
 
-# Loads an pdf example of the long-form results that can be generated following
-the quick example:
+# Loads an pdf example of the long-form results that can be generated following the quick example:
 vignette("Long_results", "FreqEstimationModel") 
 ```
 
