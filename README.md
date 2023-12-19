@@ -9,7 +9,7 @@ that contain genetically distinct parasites (i.e., those that are polyclonal);
 
 ## Current state
 
-Beware: this readme is seven years late and hasitily added. Package documentation is bare-bones. I wrote this code during my PhD. It is the first code I ever made public. It is far from perfect, but better public than private (I hope). Please email me (aimee.taylor@pasteur.fr) if you find any bugs.  
+Beware: this readme is seven years late. I wrote this code during my PhD. It is the first code I ever made public. It is far from perfect, but better public than private (I hope). Please email me (aimee.taylor@pasteur.fr) if you find any bugs. Package documentation is bare-bones. In addition to this readme, I've added a couple of vignettes, which are based on inst/Test_Run.R and inst/visualise_results.R
 
 ## More information 
 
@@ -26,7 +26,7 @@ Various aspects of the code are specific to unpublished chapters of my PhD ([ful
 
 ## Installation and use
 
-Follow the code below to install the model. Thereafter, download the files in the Inst folder and run Test_run.R from within the downloaded folder (I need to make this into a vignette), taking care with the relative path used to load example data. 
+Follow the code below to install the model. 
 
 ```r
 install.packages("devtools")
@@ -36,6 +36,15 @@ devtools::install_github("aimeertaylor/FreqEstimationModel", build_vignettes = T
 library(FreqEstimationModel)
 
 help(package = "FreqEstimationModel")
+
+browseVignettes("FreqEstimationModel")
+
+# A quick example of results that can be generated using a simulated data set: 
+vignette("Quick_example", "FreqEstimationModel") 
+
+# Loads an pdf example of the long-form results that can be generated following
+the quick example:
+vignette("Long_results", "FreqEstimationModel") 
 ```
 
 ## License
