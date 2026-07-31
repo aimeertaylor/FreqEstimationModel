@@ -1,24 +1,27 @@
 Type: Package
 Package: FreqEstimationModel
-Title: What the Package Does (Title Case)
-Version: 0.1
+Title: Multi-SNP Haplotype Frequency Estimation
+Version: 0.1.0
 Date: 2015-08-02
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
-Suggests: 
+Description:  A method for multi-SNP haplotype frequency estimation.
+License: MIT + file LICENSE
+Imports:
+    foreach,
+    doMC,
+    rngtools
+Suggests:
     abind,
-    car,
+    coda,
     gplots,
-    grDevices,
     knitr,
     lattice,
-    MCMCpack,
     plyr,
     rmarkdown,
     vioplot,
     R.rsp
-Authors: person("First", "Last", email = "first.last@example.com", role =
+Authors@R: person("Aimee", "Taylor", email = "aimee.taylor@pasteur.fr", role =
     c("aut", "cre"))
+URL: https://github.com/aimeertaylor/FreqEstimationModel
 Encoding: UTF-8
 LazyData: FALSE
 RoxygenNote: 7.2.3
